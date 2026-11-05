@@ -635,7 +635,7 @@
               <dt>화면에 쓴 값</dt><dd><code>pm10Value</code> 미세먼지, <code>pm25Value</code> 초미세먼지</dd>
             </dl>
           </div>
-          <div class="api-tip">확인 포인트: 단기예보는 읍면동 이름이 아니라 격자좌표(nx, ny)로 요청합니다. 지역별 격자값과 가장 가까운 측정소를 표로 미리 정리해 두세요. 아래 지역 선택지에 쓴 격자값은 예시입니다.</div>
+          <div class="api-tip">확인 포인트: 단기예보는 읍면동 이름이 아니라 격자좌표(nx, ny)로 요청합니다. 지역별 격자값과 가장 가까운 측정소를 표로 미리 정리해 두세요.</div>
         </div>
       </details>
     </div>
@@ -725,7 +725,7 @@
 
 <footer>
   <div class="wrap">
-    <p>데이터 출처: 공공데이터포털(data.go.kr) 제공 기관별 공개 API. 현재 화면의 수치와 기관명은 실습용 예시입니다.</p>
+    <p>데이터 출처: 공공데이터포털(data.go.kr) 제공 기관별 공개 API.</p>
     <p>「AI 모델링 및 전략기획(고급)」 실습 자료 · 강사 곽자향</p>
     <p>본 자료는 교육 참여자에게만 제공되며, 강사 동의 없는 복제·재배포·2차 교육 활용을 금합니다.</p>
   </div>
@@ -735,99 +735,19 @@
 /* =========================================================
    1. 설정
    mode 를 'api' 로 바꾸고 gasUrl 에 Apps Script 웹앱 주소를 넣으면
-   해당 창구는 예시 데이터 대신 실제 API 값을 받아 옵니다.
+   해당 창구가 실제 API 값을 받아 옵니다.
    (API 키는 HTML 이 아니라 Apps Script 안에 둡니다.)
    ========================================================= */
 const CONFIG = {
   welfare: { mode: 'sample', gasUrl: '' },
   town:    { mode: 'sample', gasUrl: '' },
   weather: { mode: 'sample', gasUrl: '' },
-  medical: { mode: 'api', gasUrl: 'https://script.google.com/macros/s/AKfycbzXjmXeOsXqy1agpZz7Vp3phF40LEpwmaEe5jkeRfk02-XqNBlm4AQJYcg343M2jEDB/exec' },
-  savedAt: '2026.11.03 05:00'   // 예시 데이터를 저장한 시각
+  medical: { mode: 'api', gasUrl: 'https://script.google.com/macros/s/AKfycbzXjmXeOsXqy1agpZz7Vp3phF40LEpwmaEe5jkeRfk02-XqNBlm4AQJYcg343M2jEDB/exec' }
 };
 
 /* =========================================================
-   2. 예시 데이터 (실제와 다름)
-   항목 이름은 실제 API 응답 항목과 최대한 맞춰 두었습니다.
+   2. 안내 문구
    ========================================================= */
-const SAMPLE = {};
-
-// 복지서비스: 한국사회보장정보원 응답 형태를 본뜸
-SAMPLE.welfare = [
-  { servNm: '기초연금', jurMnofNm: '보건복지부', src: 'nat', servDgst: '소득과 재산이 기준 이하인 만 65세 이상 어르신께 매달 연금을 드립니다.', lifeArray: ['노년'], trgterIndvdlArray: ['저소득'], intrsThemaArray: ['생활지원'], aplyMtdNm: '읍면동 행정복지센터 방문, 복지로 온라인', rprsCtadr: '보건복지상담센터 129' },
-  { servNm: '노인맞춤돌봄서비스', jurMnofNm: '보건복지부', src: 'nat', servDgst: '혼자 생활하기 어려운 어르신께 안부 확인, 생활 지원, 사회 참여 프로그램을 제공합니다.', lifeArray: ['노년'], trgterIndvdlArray: ['1인 가구', '저소득'], intrsThemaArray: ['보호·돌봄'], aplyMtdNm: '읍면동 행정복지센터 방문', rprsCtadr: '보건복지상담센터 129' },
-  { servNm: '노인일자리 및 사회활동 지원', jurMnofNm: '보건복지부', src: 'nat', servDgst: '어르신이 공익활동, 사회서비스형 일자리 등에 참여할 수 있도록 연결합니다.', lifeArray: ['노년'], trgterIndvdlArray: [], intrsThemaArray: ['일자리'], aplyMtdNm: '읍면동 행정복지센터, 시니어클럽', rprsCtadr: '보건복지상담센터 129' },
-  { servNm: '아동수당', jurMnofNm: '보건복지부', src: 'nat', servDgst: '아동의 건강한 성장을 위해 정해진 나이까지 매달 수당을 지급합니다.', lifeArray: ['영유아', '아동'], trgterIndvdlArray: [], intrsThemaArray: ['보육', '생활지원'], aplyMtdNm: '읍면동 행정복지센터 방문, 복지로 온라인', rprsCtadr: '보건복지상담센터 129' },
-  { servNm: '첫만남이용권', jurMnofNm: '보건복지부', src: 'nat', servDgst: '출생 아동 가정에 출산 초기 양육에 쓸 수 있는 바우처를 드립니다.', lifeArray: ['임신·출산', '영유아'], trgterIndvdlArray: [], intrsThemaArray: ['임신·출산', '생활지원'], aplyMtdNm: '읍면동 행정복지센터 방문, 복지로 온라인', rprsCtadr: '보건복지상담센터 129' },
-  { servNm: '청년월세 지원', jurMnofNm: '국토교통부', src: 'nat', servDgst: '부모와 따로 사는 무주택 청년에게 월세 일부를 지원합니다.', lifeArray: ['청년'], trgterIndvdlArray: ['저소득', '1인 가구'], intrsThemaArray: ['주거'], aplyMtdNm: '복지로 온라인, 읍면동 행정복지센터', rprsCtadr: '마이홈 콜센터' },
-  { servNm: '국민취업지원제도', jurMnofNm: '고용노동부', src: 'nat', servDgst: '취업을 원하는 분께 취업 상담, 직업훈련, 구직 기간 생계 지원을 함께 제공합니다.', lifeArray: ['청년', '중장년'], trgterIndvdlArray: ['저소득'], intrsThemaArray: ['일자리'], aplyMtdNm: '고용센터 방문, 고용24 온라인', rprsCtadr: '고용노동부 고객상담센터' },
-  { servNm: '에너지바우처', jurMnofNm: '산업통상자원부', src: 'nat', servDgst: '에너지 취약 가구에 전기, 가스, 난방비 등에 쓸 수 있는 바우처를 드립니다.', lifeArray: [], trgterIndvdlArray: ['저소득', '장애인'], intrsThemaArray: ['생활지원'], aplyMtdNm: '읍면동 행정복지센터 방문', rprsCtadr: '에너지바우처 콜센터' },
-  { servNm: '긴급복지 지원', jurMnofNm: '보건복지부', src: 'nat', servDgst: '갑작스러운 위기로 생계가 어려워진 가구에 생계비, 의료비 등을 신속하게 지원합니다.', lifeArray: [], trgterIndvdlArray: ['저소득'], intrsThemaArray: ['안전·위기', '생활지원'], aplyMtdNm: '읍면동 행정복지센터 방문, 전화 129', rprsCtadr: '보건복지상담센터 129' },
-  { servNm: '장애인 활동지원', jurMnofNm: '보건복지부', src: 'nat', servDgst: '혼자 일상생활이 어려운 장애인에게 활동지원사 방문 서비스를 제공합니다.', lifeArray: ['아동', '청소년', '청년', '중장년', '노년'], trgterIndvdlArray: ['장애인'], intrsThemaArray: ['보호·돌봄'], aplyMtdNm: '읍면동 행정복지센터 방문', rprsCtadr: '보건복지상담센터 129' },
-  { servNm: '전 국민 마음투자 지원', jurMnofNm: '보건복지부', src: 'nat', servDgst: '마음 건강이 걱정되는 분께 전문 심리상담 서비스를 지원합니다.', lifeArray: ['청소년', '청년', '중장년', '노년'], trgterIndvdlArray: [], intrsThemaArray: ['정신건강'], aplyMtdNm: '읍면동 행정복지센터, 복지로 온라인', rprsCtadr: '보건복지상담센터 129' },
-  { servNm: '제주 청년 주거비 지원(예시)', jurMnofNm: '제주특별자치도', src: 'jeju', servDgst: '제주에 사는 청년의 월세와 보증금 이자 부담을 덜어 드립니다.', lifeArray: ['청년'], trgterIndvdlArray: ['1인 가구', '저소득'], intrsThemaArray: ['주거'], aplyMtdNm: '읍면동 행정복지센터, 도 누리집', rprsCtadr: '제주특별자치도 청년 담당 부서' },
-  { servNm: '제주 신중년 재취업 지원(예시)', jurMnofNm: '제주특별자치도', src: 'jeju', servDgst: '퇴직 후 새 일을 찾는 중장년에게 직무 교육과 일자리 연결을 지원합니다.', lifeArray: ['중장년'], trgterIndvdlArray: [], intrsThemaArray: ['일자리', '교육'], aplyMtdNm: '도 일자리센터 방문', rprsCtadr: '제주특별자치도 일자리 담당 부서' },
-  { servNm: '제주 어르신 안부 살핌(예시)', jurMnofNm: '제주특별자치도', src: 'jeju', servDgst: '혼자 지내는 어르신 댁을 정기적으로 방문하고 전화로 안부를 확인합니다.', lifeArray: ['노년'], trgterIndvdlArray: ['1인 가구'], intrsThemaArray: ['보호·돌봄', '안전·위기'], aplyMtdNm: '읍면동 행정복지센터 방문', rprsCtadr: '읍면동 행정복지센터' },
-  { servNm: '제주 다자녀 가정 생활 지원(예시)', jurMnofNm: '제주특별자치도', src: 'jeju', servDgst: '자녀가 많은 가정의 양육비와 교육비 부담을 덜어 드립니다.', lifeArray: ['영유아', '아동', '청소년'], trgterIndvdlArray: ['다자녀'], intrsThemaArray: ['생활지원', '교육'], aplyMtdNm: '읍면동 행정복지센터 방문', rprsCtadr: '제주특별자치도 가족 담당 부서' },
-  { servNm: '제주 한부모가족 생활안정 지원(예시)', jurMnofNm: '제주특별자치도', src: 'jeju', servDgst: '한부모·조손 가정의 생활비와 아이 돌봄을 지원합니다.', lifeArray: ['영유아', '아동', '청소년'], trgterIndvdlArray: ['한부모·조손'], intrsThemaArray: ['생활지원', '보호·돌봄'], aplyMtdNm: '읍면동 행정복지센터 방문', rprsCtadr: '읍면동 행정복지센터' },
-  { servNm: '제주 다문화가족 생활 교육(예시)', jurMnofNm: '제주특별자치도', src: 'jeju', servDgst: '다문화가족에게 한국어, 생활 정보, 자녀 학습 지원 프로그램을 제공합니다.', lifeArray: [], trgterIndvdlArray: ['다문화·탈북민'], intrsThemaArray: ['교육', '문화·여가'], aplyMtdNm: '가족센터 방문', rprsCtadr: '제주 가족센터' },
-  { servNm: '제주 산후 회복 지원(예시)', jurMnofNm: '제주특별자치도', src: 'jeju', servDgst: '출산한 산모의 산후 회복과 건강관리 비용 일부를 지원합니다.', lifeArray: ['임신·출산'], trgterIndvdlArray: [], intrsThemaArray: ['임신·출산', '신체건강'], aplyMtdNm: '보건소 방문', rprsCtadr: '제주시·서귀포시 보건소' },
-  { servNm: '제주 청소년 문화 바우처(예시)', jurMnofNm: '제주특별자치도', src: 'jeju', servDgst: '청소년이 공연, 전시, 체험 프로그램에 쓸 수 있는 문화 바우처를 드립니다.', lifeArray: ['청소년'], trgterIndvdlArray: ['저소득'], intrsThemaArray: ['문화·여가'], aplyMtdNm: '읍면동 행정복지센터, 도 누리집', rprsCtadr: '제주특별자치도 청소년 담당 부서' }
-];
-
-// 우리 동네: [읍면동, 행정시, 권역, 총인구, 고령화율(%), 1인 세대 비율(%)]
-SAMPLE.town = [
-  ['일도1동','제주시','제주시 동지역',2400,31.5,48.2], ['일도2동','제주시','제주시 동지역',32000,16.8,33.0],
-  ['이도1동','제주시','제주시 동지역',8000,22.4,42.1], ['이도2동','제주시','제주시 동지역',50000,12.9,30.5],
-  ['삼도1동','제주시','제주시 동지역',16000,15.2,38.7], ['삼도2동','제주시','제주시 동지역',8500,25.6,45.3],
-  ['용담1동','제주시','제주시 동지역',7500,24.8,41.0], ['용담2동','제주시','제주시 동지역',15000,19.7,36.2],
-  ['건입동','제주시','제주시 동지역',9000,23.5,43.8], ['화북동','제주시','제주시 동지역',24000,14.1,29.4],
-  ['삼양동','제주시','제주시 동지역',26000,12.3,26.8], ['봉개동','제주시','제주시 동지역',7000,18.9,30.2],
-  ['아라동','제주시','제주시 동지역',41000,10.8,24.5], ['오라동','제주시','제주시 동지역',15000,14.6,27.1],
-  ['연동','제주시','제주시 동지역',42000,13.2,37.9], ['노형동','제주시','제주시 동지역',55000,11.4,29.8],
-  ['외도동','제주시','제주시 동지역',22000,11.9,25.3], ['이호동','제주시','제주시 동지역',5000,17.5,31.6],
-  ['도두동','제주시','제주시 동지역',2700,24.1,35.0],
-  ['한림읍','제주시','서부 읍면',21000,25.8,34.1], ['애월읍','제주시','서부 읍면',38000,19.6,30.4],
-  ['한경면','제주시','서부 읍면',9500,31.4,38.5], ['구좌읍','제주시','동부 읍면',15500,29.3,36.8],
-  ['조천읍','제주시','동부 읍면',26000,21.7,31.2], ['추자면','제주시','섬',1600,42.7,47.9],
-  ['우도면','제주시','섬',1600,33.8,44.2],
-  ['송산동','서귀포시','서귀포시 동지역',4700,30.2,42.6], ['정방동','서귀포시','서귀포시 동지역',2100,36.9,49.1],
-  ['중앙동','서귀포시','서귀포시 동지역',3600,33.4,46.0], ['천지동','서귀포시','서귀포시 동지역',3900,28.1,44.7],
-  ['효돈동','서귀포시','서귀포시 동지역',6500,27.3,35.9], ['영천동','서귀포시','서귀포시 동지역',5800,24.0,33.1],
-  ['동홍동','서귀포시','서귀포시 동지역',23000,17.2,32.4], ['서홍동','서귀포시','서귀포시 동지역',11000,18.8,30.7],
-  ['대륜동','서귀포시','서귀포시 동지역',15000,15.9,29.6], ['대천동','서귀포시','서귀포시 동지역',13000,16.3,28.4],
-  ['중문동','서귀포시','서귀포시 동지역',12000,20.9,34.8], ['예래동','서귀포시','서귀포시 동지역',4400,26.5,36.3],
-  ['대정읍','서귀포시','서부 읍면',22000,24.7,35.6], ['안덕면','서귀포시','서부 읍면',11500,26.2,36.7],
-  ['남원읍','서귀포시','동부 읍면',18500,28.6,37.4], ['성산읍','서귀포시','동부 읍면',15500,27.9,38.9],
-  ['표선면','서귀포시','동부 읍면',12000,27.0,37.1]
-].map(([name, city, zone, pop, aging, single]) => {
-  const households = Math.round(pop / (single > 40 ? 1.7 : 2.2));
-  return { name, city, zone, pop, households, elderly: Math.round(pop * aging / 100), aging, single };
-});
-
-// 날씨: 단기예보(TMP, SKY, PTY, POP, REH, WSD) + 대기오염 + 특보 형태를 본뜸
-// SKY 1 맑음, 3 구름많음, 4 흐림 / PTY 0 없음, 1 비, 2 비 또는 눈, 3 눈, 4 소나기
-SAMPLE.weather = {
-  jeju:     { label: '제주시 동지역', nx: 53, ny: 38, station: '이도동', TMP: 17, SKY: 3, PTY: 0, POP: 20, REH: 64, WSD: 6.2, VEC: '북서',
-              hours: [[6,14,3,0,20],[9,16,3,0,20],[12,18,3,0,30],[15,18,4,0,30],[18,16,4,0,40],[21,15,4,1,60],[0,14,4,1,70],[3,13,4,1,60]],
-              pm10: 42, pm25: 21, alerts: [{ type: '풍랑', level: '주의보', area: '제주도북부앞바다', at: '11.03 04:00' }] },
-  seogwipo: { label: '서귀포시 동지역', nx: 52, ny: 33, station: '동홍동', TMP: 19, SKY: 3, PTY: 0, POP: 20, REH: 70, WSD: 4.1, VEC: '동',
-              hours: [[6,16,3,0,10],[9,18,3,0,20],[12,20,1,0,10],[15,20,3,0,20],[18,18,3,0,30],[21,17,4,0,30],[0,16,4,0,40],[3,15,4,0,40]],
-              pm10: 35, pm25: 17, alerts: [] },
-  west:     { label: '서부(한림·애월·한경·대정·안덕)', nx: 48, ny: 36, station: '고산리', TMP: 16, SKY: 4, PTY: 0, POP: 30, REH: 68, WSD: 9.8, VEC: '북서',
-              hours: [[6,13,4,0,30],[9,15,4,0,30],[12,17,4,0,30],[15,17,4,0,40],[18,15,4,0,40],[21,14,4,1,60],[0,13,4,1,60],[3,12,4,0,40]],
-              pm10: 88, pm25: 41, alerts: [{ type: '풍랑', level: '주의보', area: '제주도서부앞바다', at: '11.03 04:00' }] },
-  east:     { label: '동부(조천·구좌·성산·표선·남원)', nx: 59, ny: 37, station: '성산읍', TMP: 17, SKY: 3, PTY: 0, POP: 20, REH: 66, WSD: 7.5, VEC: '북',
-              hours: [[6,14,3,0,20],[9,16,3,0,20],[12,18,3,0,20],[15,18,3,0,30],[18,16,4,0,30],[21,15,4,0,40],[0,14,4,1,60],[3,13,4,1,60]],
-              pm10: 38, pm25: 19, alerts: [] },
-  mountain: { label: '산간(한라산·중산간)', nx: 55, ny: 35, station: '노형로(가장 가까운 측정소)', TMP: 7, SKY: 4, PTY: 1, POP: 70, REH: 92, WSD: 15.2, VEC: '북서',
-              hours: [[6,4,4,1,70],[9,6,4,1,70],[12,8,4,1,60],[15,8,4,1,70],[18,6,4,1,80],[21,5,4,2,80],[0,4,4,2,80],[3,3,4,1,70]],
-              pm10: 22, pm25: 10, alerts: [{ type: '강풍', level: '주의보', area: '제주도산지', at: '11.03 03:00' }] },
-  chuja:    { label: '추자도', nx: 48, ny: 48, station: '측정소 없음(이도동 값 참고)', TMP: 16, SKY: 4, PTY: 0, POP: 40, REH: 72, WSD: 12.4, VEC: '북서',
-              hours: [[6,13,4,0,40],[9,15,4,0,40],[12,16,4,0,40],[15,16,4,0,50],[18,15,4,1,60],[21,14,4,1,60],[0,13,4,0,40],[3,13,4,0,30]],
-              pm10: 42, pm25: 21, alerts: [{ type: '풍랑', level: '주의보', area: '제주도북부앞바다(추자도 포함)', at: '11.03 04:00' }] }
-};
-
 // 행동 요령 (국민재난안전포털 안내를 바탕으로 요약)
 const TIPS = {
   '강풍': ['간판, 화분, 지붕 등 날아갈 수 있는 물건을 단단히 고정하거나 실내로 옮깁니다.', '공사장, 큰 나무, 전신주 근처는 피해서 다닙니다.', '운전할 때는 속도를 줄이고, 산간 도로와 해안 도로 이용을 자제합니다.'],
@@ -841,33 +761,9 @@ const TIPS = {
   '미세먼지': ['외출은 줄이고, 나갈 때는 보건용 마스크를 씁니다.', '창문을 닫고, 환기는 짧게 합니다.', '어린이, 어르신, 호흡기가 약한 분은 특히 주의합니다.']
 };
 
-// 약국·응급실: 국립중앙의료원 응답 형태를 본뜸 (요일 순서: 월 화 수 목 금 토 일 공휴일)
-const H = (s, c) => [s, c];
-const wk = (s, c) => [H(s,c),H(s,c),H(s,c),H(s,c),H(s,c)];
-SAMPLE.pharmacy = [
-  { dutyName: '연동 별빛약국', city: '제주시', dutyAddr: '제주시 연동 (예시 주소)', dutyTel1: '064-000-0101', night: true,  times: [...wk('0900','0100'), H('0900','0100'), H('1800','0100'), H('1800','0100')] },
-  { dutyName: '노형 해오름약국', city: '제주시', dutyAddr: '제주시 노형동 (예시 주소)', dutyTel1: '064-000-0102', night: true,  times: [...wk('1000','0100'), H('1000','0100'), H('1000','0100'), H('1000','0100')] },
-  { dutyName: '이도 감귤약국', city: '제주시', dutyAddr: '제주시 이도2동 (예시 주소)', dutyTel1: '064-000-0103', night: false, times: [...wk('0830','2100'), H('0900','1500'), null, null] },
-  { dutyName: '일도 오름약국', city: '제주시', dutyAddr: '제주시 일도2동 (예시 주소)', dutyTel1: '064-000-0104', night: false, times: [...wk('0900','1900'), H('0900','1300'), null, null] },
-  { dutyName: '화북 바당약국', city: '제주시', dutyAddr: '제주시 화북동 (예시 주소)', dutyTel1: '064-000-0105', night: false, times: [...wk('0900','2200'), H('0900','2200'), H('1000','1800'), H('1000','1800')] },
-  { dutyName: '애월 노을약국', city: '제주시', dutyAddr: '제주시 애월읍 (예시 주소)', dutyTel1: '064-000-0106', night: false, times: [...wk('0900','1900'), H('0900','1300'), null, null] },
-  { dutyName: '동홍 한라약국', city: '서귀포시', dutyAddr: '서귀포시 동홍동 (예시 주소)', dutyTel1: '064-000-0201', night: true,  times: [...wk('0900','0100'), H('0900','0100'), H('1800','0100'), H('1800','0100')] },
-  { dutyName: '중앙 귤빛약국', city: '서귀포시', dutyAddr: '서귀포시 중앙동 (예시 주소)', dutyTel1: '064-000-0202', night: false, times: [...wk('0830','2000'), H('0900','1400'), null, null] },
-  { dutyName: '중문 바람약국', city: '서귀포시', dutyAddr: '서귀포시 중문동 (예시 주소)', dutyTel1: '064-000-0203', night: false, times: [...wk('0900','2200'), H('0900','2200'), H('0900','2200'), H('1000','1800')] },
-  { dutyName: '대정 모슬포약국', city: '서귀포시', dutyAddr: '서귀포시 대정읍 (예시 주소)', dutyTel1: '064-000-0204', night: false, times: [...wk('0900','1900'), H('0900','1300'), null, null] },
-  { dutyName: '성산 일출약국', city: '서귀포시', dutyAddr: '서귀포시 성산읍 (예시 주소)', dutyTel1: '064-000-0205', night: false, times: [...wk('0900','2000'), H('0900','2000'), H('1000','1600'), null] }
-];
-SAMPLE.er = [
-  { dutyName: '한라권역 예시병원', city: '제주시', dutyEmclsName: '권역응급의료센터', dutyAddr: '제주시 (예시 주소)', dutyTel3: '064-000-1190', hvec: 8 },
-  { dutyName: '제주 예시중앙병원', city: '제주시', dutyEmclsName: '지역응급의료센터', dutyAddr: '제주시 (예시 주소)', dutyTel3: '064-000-1191', hvec: 5 },
-  { dutyName: '연동 예시병원', city: '제주시', dutyEmclsName: '지역응급의료기관', dutyAddr: '제주시 (예시 주소)', dutyTel3: '064-000-1192', hvec: 2 },
-  { dutyName: '서귀포 예시의료원', city: '서귀포시', dutyEmclsName: '지역응급의료센터', dutyAddr: '서귀포시 (예시 주소)', dutyTel3: '064-000-1193', hvec: 4 },
-  { dutyName: '서귀포 예시병원', city: '서귀포시', dutyEmclsName: '지역응급의료기관', dutyAddr: '서귀포시 (예시 주소)', dutyTel3: '064-000-1194', hvec: 0 }
-];
-
 /* =========================================================
    3. 데이터 가져오기
-   예시 모드: SAMPLE 값을 그대로 돌려줌
+   API 가 연결되지 않은 창구는 '준비 중' 안내를 보여 줌
    API 모드: Apps Script 웹앱에 type 과 요청값을 붙여 호출
    ========================================================= */
 async function getData(win, type, params = {}) {
@@ -878,14 +774,14 @@ async function getData(win, type, params = {}) {
     if (!res.ok) throw new Error('API 응답 오류: ' + res.status);
     return await res.json();
   }
-  return structuredClone(SAMPLE[type]);
+  throw new Error('아직 실시간 API가 연결되지 않았습니다');
 }
 
 function srcBadge(win) {
   const live = CONFIG[win].mode === 'api' && CONFIG[win].gasUrl;
   return live
     ? '<span class="tag-sample tag-live">실시간 API</span><span>공공데이터포털 기준</span>'
-    : '<span class="tag-sample">예시 데이터</span><span>저장 시각 ' + CONFIG.savedAt + '</span>';
+    : '';
 }
 document.querySelectorAll('[data-src]').forEach(el => el.innerHTML = srcBadge(el.dataset.src));
 
@@ -1099,7 +995,7 @@ function renderWeather() {
     <div class="hours" aria-label="시간별 예보">
       ${r.hours.map(([h, t, s, p, pop]) => `<div class="hour"><div>${String(h).padStart(2, '0')}시</div><span class="e">${wxIcon(s, p)}</span><div class="t">${t}°</div><div class="p">${pop}%</div></div>`).join('')}
     </div>
-    <div class="src" style="margin-top:12px">격자 nx ${r.nx}, ny ${r.ny} (예시값)</div>`;
+    <div class="src" style="margin-top:12px">격자 nx ${r.nx}, ny ${r.ny}</div>`;
 
   const g10 = airGrade(r.pm10, 'pm10'), g25 = airGrade(r.pm25, 'pm25');
   $('#xAir').innerHTML = `
